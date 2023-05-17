@@ -62,6 +62,13 @@ async def predict(input_text: InputText):
 
     return {'prediction': "Positive" if prediction == 1 else "Negative"}
 
+@app.post('/wrong')
+async def wrong():
+    """
+    Increments the wrong prediction counter
+    """
+    app.state.nWrongPredictions += 1
+
 @app.get('/metrics')
 async def metrics():
     """
