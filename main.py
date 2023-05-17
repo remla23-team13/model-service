@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import joblib
 import pickle
+import os
 
 cvFile='c1_BoW_Sentiment_Model.pkl'
 cv = pickle.load(open(cvFile, "rb"))
@@ -36,7 +37,7 @@ app.state.reviewSize250Counter = 0
 app.state.reviewSizeInfCounter = 0
 app.state.reviewSizeSum = 0
 
-@app.post('/model-s-service/predict')
+@app.post(os.getenv("MODEL_PATH") + '/predict')
 async def predict(input_text: InputText):
     """
     Predicts the sentiment of a given text
@@ -62,7 +63,7 @@ async def predict(input_text: InputText):
 
     return {'prediction': "Positive" if prediction == 1 else "Negative"}
 
-@app.post('/model-s-service/wrong')
+@app.post(os.getenv("MODEL_PATH") + '/wrong')
 async def wrong():
     """
     Increments the wrong prediction counter
