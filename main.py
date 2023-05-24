@@ -60,6 +60,7 @@ async def predict(input_text: InputText):
         app.state.reviewSize250Counter += 1
     else:
         app.state.reviewSizeInfCounter += 1
+    app.state.reviewSizeSum += size
 
     return {'prediction': "Positive" if prediction == 1 else "Negative"}
 
