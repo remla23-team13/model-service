@@ -1,19 +1,18 @@
 from fastapi import FastAPI, Response
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import joblib
 import pickle
 import os
+import urllib.request
+import gdown 
+from input_form import InputText
 
-cvFile='c1_BoW_Sentiment_Model.pkl'
-cv = pickle.load(open(cvFile, "rb"))
-model = joblib.load('c2_Classifier_Sentiment_Model')
+gdown.download(os.getenv("MODEL_URL"), os.getenv("MODEL_FILE"), quiet=False)
+gdown.download(os.getenv("PREPROCESSOR_URL"), os.getenv("PREPROCESSOR_FILE"), quiet=False)
 
-
-class InputText(BaseModel):
-    data: str
-
+model = joblib.load(os.getenv("MODEL_FILE"))
+preprocessor = joblib.load(os.getenv("PREPROCESSOR_FILE"))
 
 app = FastAPI(swagger_ui_oauth2_redirect_url=None)
 
@@ -44,7 +43,7 @@ async def predict(input_text: InputText):
     """
     app.state.nPredictions += 1
     data = input_text.data
-    processed_input = cv.transform([data]).toarray()[0]
+    processed_input = preprocessor.transform([data]).toarray()[0]
     prediction = model.predict([processed_input])[0]
 
     size = len(data)
