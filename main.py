@@ -80,7 +80,13 @@ async def metrics():
 
     m = "# HELP wrong_prediction_ratio Ratio of wrong predictions over all predictions.\n"
     m+= "# TYPE wrong_prediction_ratio gauge\n"
-    m+= "wrong_prediction_ratio " + "0\n\n" if app.state.nPredictions == 0 else str(app.state.nWrongPredictions/app.state.nPredictions) + "\n\n"
+    m+= "wrong_prediction_ratio "
+    
+    if app.state.nPredictions == 0:
+        m += "0\n\n"
+    else:
+        m += str(app.state.nWrongPredictions / app.state.nPredictions) + "\n\n"
+
 
     m+= "# HELP num_requests The number of requests that have been served.\n"
     m+= "# TYPE num_requests counter\n"
