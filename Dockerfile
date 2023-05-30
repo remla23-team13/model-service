@@ -4,6 +4,8 @@ WORKDIR /root
 COPY requirements.txt /root/
 RUN pip install -r requirements.txt
 
+ARG version="error"
+
 COPY input_form.py /root/
 COPY main.py /root/
 
@@ -14,5 +16,6 @@ ENV PREPROCESSOR_URL="https://drive.google.com/uc?id=1Ud_w0xAmpg6xfUX30DO6cGFSWX
 ENV MODEL_PATH="/model-s-service"
 ENV MODEL_FILE="model.joblib"
 ENV PREPROCESSOR_FILE="preprocessor.joblib"
+ENV VERSION=${version}
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
