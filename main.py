@@ -92,7 +92,7 @@ async def metrics():
 
     m+= "# HELP num_requests The number of requests that have been served.\n"
     m+= "# TYPE num_requests counter\n"
-    m+= "num_requests{{version=\"" + version + "\"}} " + str(app.state.nPredictions) + "\n\n" # TODO get version 
+    m+= "num_requests{version=\"" + version + "\"} " + str(app.state.nPredictions) + "\n\n" # TODO get version 
 
     m+= "# HELP review_size A histogram of the review sizes (characters)\n"
     m+= "# TYPE review_size histogram\n"
