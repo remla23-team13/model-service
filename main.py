@@ -105,6 +105,13 @@ async def metrics():
 
     return Response(content=m, media_type="text/plain")
 
+@app.get('/version')
+async def health():
+    """
+    Returns the version of the model
+    """
+    return {'version': "2"}
+
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
