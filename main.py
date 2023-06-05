@@ -5,7 +5,8 @@ import joblib
 import pickle
 import os
 import urllib.request
-import gdown 
+import gdown
+import restaurant_db
 from input_form import InputText
 
 gdown.download(os.getenv("MODEL_URL"), os.getenv("MODEL_FILE"), quiet=False)
@@ -36,8 +37,31 @@ app.state.reviewSize250Counter = 0
 app.state.reviewSizeInfCounter = 0
 app.state.reviewSizeSum = 0
 
-@app.post(os.getenv("MODEL_PATH") + '/predict')
-async def predict(input_text: InputText):
+@app.get('/restaurants')
+async def restaurants():
+    """
+    Returns a list of restaurants
+    """
+    ## return the list as json
+    restaurants = restaurant_db.get_restaurants()
+    return restaurants
+
+@app.get('/reviews/{restaurant_id}')
+async def reviews(restaurant_id: int):
+    """
+    Returns a list of reviews for a given restaurant
+    """
+    ## return the list as json
+    reviews = restaurant_db.get_reviews(restaurant_id)
+    return reviews
+
+@app.get('/restaurant/{restaurant_id}')
+async def restaurant(restaurant_id: int):
+    restaurant = restaurant_db.get_restaurant(restaurant_id)
+    return restaurant
+
+@app.post('/predict/{restaurant_id}')
+async def predict(input_text: InputText, restaurant_id: int):
     """
     Predicts the sentiment of a given text
     """
@@ -45,6 +69,7 @@ async def predict(input_text: InputText):
     data = input_text.data
     processed_input = preprocessor.transform([data]).toarray()[0]
     prediction = model.predict([processed_input])[0]
+    restaurant_db.insert_review(restaurant_id, data)
 
     size = len(data)
     if size <= 50:
@@ -63,7 +88,7 @@ async def predict(input_text: InputText):
 
     return {'prediction': "Positive" if prediction == 1 else "Negative"}
 
-@app.post(os.getenv("MODEL_PATH") + '/wrong')
+@app.post('/wrong')
 async def wrong():
     """
     Increments the wrong prediction counter
@@ -106,6 +131,13 @@ async def metrics():
     m+= "review_size_count " + str(app.state.nPredictions) + "\n\n"
 
     return Response(content=m, media_type="text/plain")
+
+@app.get('/version')
+async def health():
+    """
+    Returns the version of the model
+    """
+    return {'version': "2"}
 
 if __name__ == '__main__':
     import uvicorn

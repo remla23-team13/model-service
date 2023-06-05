@@ -1,13 +1,8 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
 
-WORKDIR /root
-COPY requirements.txt /root/
+WORKDIR /app
+COPY . /app/
 RUN pip install -r requirements.txt
-
-ARG version="error"
-
-COPY input_form.py /root/
-COPY main.py /root/
 
 EXPOSE 8000
 
