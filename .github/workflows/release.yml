@@ -26,6 +26,7 @@ jobs:
           IMG=ghcr.io/${{ github.repository }}
           IMG=${IMG,,}
           docker build \
+            --build-arg version=${{ env.version }} \
             --tag $IMG:${{ env.version }} \
             --tag $IMG:${{ env.version_major }}.${{ env.version_minor }}.latest \
             --tag $IMG:${{ env.version_major }}.latest \

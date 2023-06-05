@@ -103,6 +103,8 @@ async def metrics():
 
     global countIdx, countSub
 
+    version = os.getenv("VERSION")
+
     m = "# HELP wrong_prediction_ratio Ratio of wrong predictions over all predictions.\n"
     m+= "# TYPE wrong_prediction_ratio gauge\n"
     m+= "wrong_prediction_ratio "
@@ -115,7 +117,7 @@ async def metrics():
 
     m+= "# HELP num_requests The number of requests that have been served.\n"
     m+= "# TYPE num_requests counter\n"
-    m+= "num_requests " + str(app.state.nPredictions) + "\n\n"
+    m+= "num_requests{version=\"" + version + "\"} " + str(app.state.nPredictions) + "\n\n" # TODO get version 
 
     m+= "# HELP review_size A histogram of the review sizes (characters)\n"
     m+= "# TYPE review_size histogram\n"
