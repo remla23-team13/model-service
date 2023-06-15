@@ -2,18 +2,19 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import joblib
-import pickle
 import os
-import urllib.request
 import gdown
 import restaurant_db
 from input_form import InputText
+from remlalib.preprocess import Preprocess
+from urllib.request import urlopen
 
-gdown.download(os.getenv("MODEL_URL"), os.getenv("MODEL_FILE"), quiet=False)
-gdown.download(os.getenv("PREPROCESSOR_URL"), os.getenv("PREPROCESSOR_FILE"), quiet=False)
+preprocessor = Preprocess()
+preprocessor.load_from_url(os.getenv("PREPROCESSOR_URL"))
 
-model = joblib.load(os.getenv("MODEL_FILE"))
-preprocessor = joblib.load(os.getenv("PREPROCESSOR_FILE"))
+model = None
+with (urlopen(os.getenv("MODEL_URL"))) as file:
+    model = joblib.load(file)
 
 app = FastAPI(swagger_ui_oauth2_redirect_url=None)
 
@@ -67,7 +68,7 @@ async def predict(input_text: InputText, restaurant_id: int):
     """
     app.state.nPredictions += 1
     data = input_text.data
-    processed_input = preprocessor.transform([data]).toarray()[0]
+    processed_input = preprocessor.preprocess_sample(data)
     prediction = model.predict([processed_input])[0]
     restaurant_db.insert_review(restaurant_id, data)
 
