@@ -139,14 +139,14 @@ async def metrics():
     else:
         m += str(app.state.nWrongPredictions / app.state.nPredictions) + "\n"
 
-    m+= "wrong_prediction_ratio{v1} "
+    m+= "wrong_prediction_ratio{app=\"v1\"} "
 
     if app.state.nPredictions_v1 == 0:
         m += "0\n"
     else:
         m += str(app.state.nWrongPredictions_v1 / app.state.nPredictions_v1) + "\n"
 
-    m+= "wrong_prediction_ratio{v2} "
+    m+= "wrong_prediction_ratio{app=\"v2\"} "
 
     if app.state.nPredictions_v2 == 0:
         m += "0\n\n"
