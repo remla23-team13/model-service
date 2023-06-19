@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import joblib
@@ -28,7 +28,13 @@ app.add_middleware(
 )
 
 app.state.nPredictions = 0
+app.state.nPredictions_v1 = 0
+app.state.nPredictions_v2 = 0
+
 app.state.nWrongPredictions = 0
+app.state.nWrongPredictions_v1 = 0
+app.state.nWrongPredictions_v2 = 0
+
 app.state.reviewSize50Counter = 0
 app.state.reviewSize100Counter = 0
 app.state.reviewSize150Counter = 0
@@ -61,11 +67,21 @@ async def restaurant(restaurant_id: int):
     return restaurant
 
 @app.post('/predict/{restaurant_id}')
-async def predict(input_text: InputText, restaurant_id: int):
+async def predict(input_text: InputText, restaurant_id: int, request: Request):
     """
     Predicts the sentiment of a given text
     """
-    app.state.nPredictions += 1
+
+    cookies = request.cookies
+    app_version_cookie = cookies.get("AppVersion")
+
+    if app_version_cookie == "v1":
+        app.state.nPredictions_v1 += 1
+    elif app_version_cookie == "v2":
+        app.state.nPredictions_v2 += 1
+    else:
+        app.state.nPredictions += 1
+
     data = input_text.data
     processed_input = preprocessor.transform([data]).toarray()[0]
     prediction = model.predict([processed_input])[0]
@@ -89,11 +105,20 @@ async def predict(input_text: InputText, restaurant_id: int):
     return {'prediction': "Positive" if prediction == 1 else "Negative"}
 
 @app.post('/wrong')
-async def wrong():
+async def wrong(request: Request):
     """
     Increments the wrong prediction counter
     """
-    app.state.nWrongPredictions += 1
+
+    cookies = request.cookies
+    app_version_cookie = cookies.get("AppVersion")
+
+    if app_version_cookie == "v1":
+        app.state.nWrongPredictions_v1 += 1
+    elif app_version_cookie == "v2":
+        app.state.nWrongPredictions_v2 += 1
+    else:
+        app.state.nWrongPredictions += 1
 
 @app.get('/metrics')
 async def metrics():
@@ -110,9 +135,23 @@ async def metrics():
     m+= "wrong_prediction_ratio "
     
     if app.state.nPredictions == 0:
+        m += "0\n"
+    else:
+        m += str(app.state.nWrongPredictions / app.state.nPredictions) + "\n"
+
+    m+= "wrong_prediction_ratio{v1} "
+
+    if app.state.nPredictions_v1 == 0:
+        m += "0\n"
+    else:
+        m += str(app.state.nWrongPredictions_v1 / app.state.nPredictions_v1) + "\n"
+
+    m+= "wrong_prediction_ratio{v2} "
+
+    if app.state.nPredictions_v2 == 0:
         m += "0\n\n"
     else:
-        m += str(app.state.nWrongPredictions / app.state.nPredictions) + "\n\n"
+        m += str(app.state.nWrongPredictions_v2 / app.state.nPredictions_v2) + "\n\n"
 
 
     m+= "# HELP num_requests The number of requests that have been served.\n"
