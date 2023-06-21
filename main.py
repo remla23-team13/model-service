@@ -35,6 +35,10 @@ app.state.nWrongPredictions = 0
 app.state.nWrongPredictions_v1 = 0
 app.state.nWrongPredictions_v2 = 0
 
+app.state.nPositivePredictions = 0
+app.state.nPositivePredictions_v1 = 0
+app.state.nPositivePredictions_v2 = 0
+
 app.state.reviewSize50Counter = 0
 app.state.reviewSize100Counter = 0
 app.state.reviewSize150Counter = 0
@@ -79,13 +83,21 @@ async def predict(input_text: InputText, restaurant_id: int, request: Request):
         app.state.nPredictions_v1 += 1
     elif app_version_cookie == "v2":
         app.state.nPredictions_v2 += 1
-    else:
-        app.state.nPredictions += 1
+    
+    app.state.nPredictions += 1
 
     data = input_text.data
     processed_input = preprocessor.transform([data]).toarray()[0]
     prediction = model.predict([processed_input])[0]
     restaurant_db.insert_review(restaurant_id, data)
+
+    if (prediction == 1):
+        if app_version_cookie == "v1":
+            app.state.nPositivePredictions_v1 += 1
+        elif app_version_cookie == "v2":
+            app.state.nPositivePredictions_v2 += 1
+        
+        app.state.nPositivePredictions += 1
 
     size = len(data)
     if size <= 50:
@@ -117,8 +129,8 @@ async def wrong(request: Request):
         app.state.nWrongPredictions_v1 += 1
     elif app_version_cookie == "v2":
         app.state.nWrongPredictions_v2 += 1
-    else:
-        app.state.nWrongPredictions += 1
+    
+    app.state.nWrongPredictions += 1
 
 @app.get('/metrics')
 async def metrics():
@@ -139,14 +151,14 @@ async def metrics():
     else:
         m += str(app.state.nWrongPredictions / app.state.nPredictions) + "\n"
 
-    m+= "wrong_prediction_ratio{app=\"v1\"} "
+    m+= "wrong_prediction_ratio{webapp=\"v1\"} "
 
     if app.state.nPredictions_v1 == 0:
         m += "0\n"
     else:
         m += str(app.state.nWrongPredictions_v1 / app.state.nPredictions_v1) + "\n"
 
-    m+= "wrong_prediction_ratio{app=\"v2\"} "
+    m+= "wrong_prediction_ratio{webapp=\"v2\"} "
 
     if app.state.nPredictions_v2 == 0:
         m += "0\n\n"
@@ -154,9 +166,33 @@ async def metrics():
         m += str(app.state.nWrongPredictions_v2 / app.state.nPredictions_v2) + "\n\n"
 
 
+    m = "# HELP positive_prediction_ratio Ratio of positive predictions over all predictions.\n"
+    m+= "# TYPE positive_prediction_ratio gauge\n"
+    m+= "positive_prediction_ratio "
+    
+    if app.state.nPredictions == 0:
+        m += "0\n"
+    else:
+        m += str(app.state.nPositivePredictions / app.state.nPredictions) + "\n"
+
+    m+= "positive_prediction_ratio{webapp=\"v1\"} "
+
+    if app.state.nPositivePredictions_v1 == 0:
+        m += "0\n"
+    else:
+        m += str(app.state.nPositivePredictions_v1 / app.state.nPredictions_v1) + "\n"
+
+    m+= "positive_prediction_ratio{webapp=\"v2\"} "
+
+    if app.state.nPositivePredictions_v2 == 0:
+        m += "0\n\n"
+    else:
+        m += str(app.state.nPositivePredictions_v2 / app.state.nPredictions_v2) + "\n\n"
+
+
     m+= "# HELP num_requests The number of requests that have been served.\n"
     m+= "# TYPE num_requests counter\n"
-    m+= "num_requests{version=\"" + version + "\"} " + str(app.state.nPredictions) + "\n\n" # TODO get version 
+    m+= "num_requests{version=\"" + version + "\"} " + str(app.state.nPredictions) + "\n\n"
 
     m+= "# HELP review_size A histogram of the review sizes (characters)\n"
     m+= "# TYPE review_size histogram\n"
