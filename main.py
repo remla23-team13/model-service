@@ -43,8 +43,8 @@ app.state.predictionTimeCount = 0
 app.state.predictionTime1MicroSecond = 0
 app.state.predictionTime10MicroSecond = 0
 app.state.predictionTime100MicroSecond = 0
-app.state.predictionTimeSum1000MicroSecond = 0
-app.state.predictionTimeSum10000MicroSecond = 0
+app.state.predictionTime1000MicroSecond = 0
+app.state.predictionTime10000MicroSecond = 0
 
 
 @app.get('/restaurants')
