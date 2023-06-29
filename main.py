@@ -176,7 +176,7 @@ async def metrics():
 
     m = "# HELP wrong_prediction_ratio Ratio of wrong predictions over all predictions.\n"
     m += "# TYPE wrong_prediction_ratio gauge\n"
-    m += "wrong_prediction_ratio "
+    m += "wrong_prediction_ratio{webapp=\"\"} "
 
     if app.state.nPredictions == 0:
         m += "0\n"
