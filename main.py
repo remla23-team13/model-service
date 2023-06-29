@@ -198,7 +198,7 @@ async def metrics():
         m += str(app.state.nWrongPredictions_v2 / app.state.nPredictions_v2) + "\n\n"
 
 
-    m = "# HELP positive_prediction_ratio Ratio of positive predictions over all predictions.\n"
+    m+= "# HELP positive_prediction_ratio Ratio of positive predictions over all predictions.\n"
     m+= "# TYPE positive_prediction_ratio gauge\n"
     m+= "positive_prediction_ratio "
     
@@ -209,14 +209,14 @@ async def metrics():
 
     m+= "positive_prediction_ratio{webapp=\"v1\"} "
 
-    if app.state.nPositivePredictions_v1 == 0:
+    if app.state.nPredictions_v1 == 0:
         m += "0\n"
     else:
         m += str(app.state.nPositivePredictions_v1 / app.state.nPredictions_v1) + "\n"
 
     m+= "positive_prediction_ratio{webapp=\"v2\"} "
 
-    if app.state.nPositivePredictions_v2 == 0:
+    if app.state.nPredictions_v2 == 0:
         m += "0\n\n"
     else:
         m += str(app.state.nPositivePredictions_v2 / app.state.nPredictions_v2) + "\n\n"
