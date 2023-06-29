@@ -30,9 +30,9 @@ FastAPI generates automatically an OpenAPI specification for the available endpo
 The exposed APIs can be tested using the [Swagger UI](https://swagger.io/tools/swagger-ui/) at `http://localhost:8000/docs`.
 
 ## Tracked Metrics
-In order to support both a form of A/B testing and a rate-limiter for the complete project the following metrics are tracked.
 You can inspect these metrics using either the Grafana dashboard or Prometheus dashboard, see the [operation repository](https://github.com/remla23-team13/operation) for more details.
 * num_requests - The number of requests that have been served
 * positive_prediction_ratio - Ratio of positive predictions over all predictions (per version of the webapp)
 * wrong_prediction_ratio - Ratio of wrong predictions over all predictions (per version of the webapp)
 * review_size - A histogram of the review sizes (characters)
+* prediction_time - A summary of the time it takes to process the input and do a prediction
